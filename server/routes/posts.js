@@ -5,7 +5,7 @@ const verify = require('../config/jwt').verify;
 require('dotenv').config();
 
 //Get all posts
-router.get('/all', verify, async (req, res) => {
+router.get('/all', async (req, res) => {
     try {
         const posts = await prisma.post.findMany({
             include: {comments: true}
@@ -26,8 +26,109 @@ router.get('/all', verify, async (req, res) => {
     }
 });
 
+//Get post based on input change
+router.post('/search-post', async (req, res) => {
+    try {
+        const posts = await prisma.post.findMany({
+            where: {
+                title: {
+                    contains: req.body.search
+                }
+            },
+            include: {comments: true}
+        });
+
+        if(!posts) {
+            return res.status(500).json({message: 'Could not retreive posts'});
+        }
+
+        res.status(200).json({
+            authenticated: true,
+            message: 'Retreived posts successfully',
+            posts: posts
+        });
+    } catch(err) {
+        console.error(err);
+        return res.status(500).json({message: 'Error retreiving posts'});
+    }
+});
+
+//Get featured posts
+router.get('/featured', async (req, res) => {
+    try {
+        const posts = await prisma.post.findMany({
+            where: {featured: true},
+            include: {comments: true}
+        });
+
+        if(!posts) {
+            return res.status(500).json({message: 'Could not retreive posts'});
+        }
+
+        res.status(200).json({
+            authenticated: true,
+            message: 'Retreived posts successfully',
+            posts: posts
+        });
+    } catch(err) {
+        console.error(err);
+        return res.status(500).json({message: 'Error retreiving posts'});
+    }
+});
+
+//Get latest 5 posts
+router.get('/latest', async (req, res) => {
+    try {
+        const posts = await prisma.post.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            },
+            take: 5,
+            include: {comments: true},
+        });
+
+        if(!posts) {
+            return res.status(500).json({message: 'Could not retreive posts'});
+        }
+
+        res.status(200).json({
+            authenticated: true,
+            message: 'Retreived posts successfully',
+            posts: posts
+        });
+    } catch(err) {
+        console.error(err);
+        return res.status(500).json({message: 'Error retreiving posts'});
+    }
+});
+
+//Get Main Post
+router.get('/main', async (req, res) => {
+    try {
+        const mainPost = await prisma.post.findFirst({
+            where: {main: true},
+            include: {comments: true}
+        });
+
+        console.log(mainPost)
+
+        if(!mainPost) {
+            return res.status(500).json({message: 'Could not retreive main post'});
+        }
+
+        res.status(200).json({
+            authenticated: true,
+            message: 'Retreived main post successfully',
+            mainPost: mainPost
+        });
+    } catch(err) {
+        console.error(err);
+        return res.status(500).json({message: 'Error retreiving main post'});
+    }
+})
+
 //Get post
-router.get('/:id/post', verify, async (req, res) => {
+router.get('/:id/post', async (req, res) => {
     try {
         const {id} = req.params;
         const post = await prisma.post.findUnique({

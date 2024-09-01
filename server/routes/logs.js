@@ -3,7 +3,6 @@ const { PrismaClient } = require('@prisma/client');
 const genPass = require('../lib/passwordUtils').genPassword;
 const prisma = new PrismaClient();
 const passport = require("passport");
-const jwt = require('jsonwebtoken');
 // const { token } = require('morgan');
 
 require('dotenv').config();
