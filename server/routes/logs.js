@@ -3,9 +3,38 @@ const { PrismaClient } = require('@prisma/client');
 const genPass = require('../lib/passwordUtils').genPassword;
 const prisma = new PrismaClient();
 const passport = require("passport");
+const { verifyAdmin } = require('../config/jwt');
+const { verify } = require('../config/jwt');
+
 // const { token } = require('morgan');
 
 require('dotenv').config();
+
+router.get('/protected', verify, (req, res) => {
+    try {
+        delete req.user.hashpassword;
+        delete req.user.salt;
+        res.status(200).json({
+            authenticated: true,
+            user: req.user
+        })
+    } catch(err) {
+        console.log(err);   
+    }
+});
+
+router.get('/admin-protected', verifyAdmin, (req, res) => {
+    try {
+        delete req.user.hashpassword;
+        delete req.user.salt;
+        res.status(200).json({
+            authenticated: true,
+            user: req.user
+        })
+    } catch(err) {
+        console.log(err);   
+    }
+})
 
 router.post('/signup', async (req, res) => {
     try {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import post_api from '../apis/posts';
+import { Link } from 'react-router-dom';
 
 const Search = () => {
 
@@ -54,7 +55,7 @@ const Search = () => {
                             <div className='flex flex-col mt-5'>
                                 {
                                     searchPosts.map(post => (
-                                        <p key={post.id} className='text-black py-2 text-sm cursor-pointer hover:bg-gray-200'>{post.title}</p>
+                                        <Link to={`/post/${post.id}/read`} key={post.id} className='text-black py-2 text-sm cursor-pointer hover:bg-gray-200'>{post.title}</Link>
                                     ))
                                 }
                             </div>

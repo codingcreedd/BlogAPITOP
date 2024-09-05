@@ -8,11 +8,21 @@ const session = require('express-session');
 const cors = require('cors');
 const passport = require('passport');
 
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+
 //middlewares
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: function (origin, callback) {
+      // Allow requests with no origin, like mobile apps or curl requests
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'The CORS policy for this site does not allow access from the specified origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     credentials: true
-}));
+  }));
 
 app.use(session({
     secret: process.env.SECRET,
@@ -37,10 +47,12 @@ app.use(passport.session());
 const logs = require('./routes/logs');
 const posts = require('./routes/posts');
 const comments = require('./routes/comments');
+const users = require('./routes/users');
 
 app.use('/logs', logs);
 app.use('/posts', posts);
 app.use('/comments', comments);
+app.use('/users', users);
 
 
 const port = process.env.PORT || 3000;

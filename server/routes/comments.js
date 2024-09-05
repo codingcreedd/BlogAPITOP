@@ -4,6 +4,8 @@ const prisma = new PrismaClient();
 const verify = require('../config/jwt').verify;
 require('dotenv').config();
 
+//No need for Reading comments because they are included with the GET a single post request
+
 //Add a comment
 router.post('/create', verify, async (req, res) => {
     try {
@@ -11,7 +13,7 @@ router.post('/create', verify, async (req, res) => {
            data: {
                 description: req.body.description, //might be changed due to a rich text editor
                 userid: req.body.userid,
-                postid: req.body.postid
+                postid: Number(req.body.postid)
            }
         });
 

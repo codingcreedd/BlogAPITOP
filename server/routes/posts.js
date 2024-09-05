@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { PrismaClient } = require('@prisma/client');
+const { verifyAdmin } = require('../config/jwt');
 const prisma = new PrismaClient();
 const verify = require('../config/jwt').verify;
 require('dotenv').config();
@@ -132,8 +133,19 @@ router.get('/:id/post', async (req, res) => {
     try {
         const {id} = req.params;
         const post = await prisma.post.findUnique({
-            where: {id: id},
-            include: {comments: true}
+            where: {id: Number(id)},
+            include: {
+                comments: {
+                    include: {
+                        user: {
+                            select: {
+                                username: true,
+                                id: true,
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         if(!post) {
@@ -152,12 +164,12 @@ router.get('/:id/post', async (req, res) => {
 });
 
 //Creat a post
-router.post('/create', verify, async (req, res) => {
+router.post('/create', verifyAdmin, async (req, res) => {
     try {
         const post = await prisma.post.create({
            data: {
                 title: req.body.title,
-                description: req.body.description, //might be changed due to a rich text editor
+                body: req.body.body, //might be changed due to a rich text editor
                 userid: req.body.userid
            }
         });
@@ -178,7 +190,7 @@ router.post('/create', verify, async (req, res) => {
 });
 
 //Delete a post
-router.delete('/:id/delete', verify, async (req, res) => {
+router.delete('/:id/delete', verifyAdmin, async (req, res) => {
     try {
         const {id} = req.params;
         const post = await prisma.post.delete({
